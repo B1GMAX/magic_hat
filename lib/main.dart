@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:magic_hat/utils/shared_preferences/shared_preferences.dart';
 import 'navigator_bar/navigator_bar.dart';
 
 void main() async {
-  MagicSharedPreferences magicSharedPreferences = MagicSharedPreferences();
-  await magicSharedPreferences.init();
   runApp(const MyApp());
 }
 

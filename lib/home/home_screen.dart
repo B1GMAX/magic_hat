@@ -2,17 +2,28 @@ import 'package:flutter/material.dart';
 import 'package:magic_hat/home/character_widget.dart';
 import 'package:magic_hat/home/home_bloc.dart';
 import 'package:magic_hat/home/house_widget.dart';
-import 'package:magic_hat/home/score_widget.dart';
 import 'package:magic_hat/model/character_model.dart';
+import 'package:magic_hat/model/score_model.dart';
+import 'package:magic_hat/utils/scores.dart';
 import 'package:provider/provider.dart';
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+  final ScoreModel? scoreModel;
+  final List<CharacterModel> characters;
+
+  const HomeScreen({
+    required this.scoreModel,
+    required this.characters,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Provider<HomeBloc>(
-      create: (context) => HomeBloc(),
+      create: (context) => HomeBloc(
+        scoreModel: scoreModel,
+        characters: characters,
+      ),
       lazy: false,
       builder: (context, _) {
         return StreamBuilder<CharacterModel>(
@@ -21,37 +32,13 @@ class HomeScreen extends StatelessWidget {
             return snapshot.hasData
                 ? Column(
                     children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          StreamBuilder<int>(
-                              initialData: 0,
-                              stream: context.read<HomeBloc>().totalStream,
-                              builder: (context, snapshot) {
-                                return ScoreWidget(
-                                  text: 'Total',
-                                  value: snapshot.data!.toString(),
-                                );
-                              }),
-                          StreamBuilder<int>(
-                              initialData: 0,
-                              stream: context.read<HomeBloc>().successStream,
-                              builder: (context, snapshot) {
-                                return ScoreWidget(
-                                  text: 'Success',
-                                  value: snapshot.data!.toString(),
-                                );
-                              }),
-                          StreamBuilder<int>(
-                              initialData: 0,
-                              stream: context.read<HomeBloc>().failedStream,
-                              builder: (context, snapshot) {
-                                return ScoreWidget(
-                                  text: 'Failed',
-                                  value: snapshot.data!.toString(),
-                                );
-                              }),
-                        ],
+                      Scores(
+                        totalText: 'Total',
+                        totalValue: snapshot.data!.toString(),
+                        successText: 'Success',
+                        successValue: snapshot.data!.toString(),
+                        failedText: 'Failed',
+                        failedValue: snapshot.data!.toString(),
                       ),
                       const SizedBox(height: 15),
                       CharacterWidget(character: snapshot.data!),
@@ -71,9 +58,9 @@ class HomeScreen extends StatelessWidget {
                             houseName: 'Slytherin',
                             onPressed: (house) {
                               context.read<HomeBloc>().onHousePressed(
-                                house,
-                                snapshot.data!.house,
-                              );
+                                    house,
+                                    snapshot.data!.house,
+                                  );
                             },
                           ),
                         ],
@@ -84,18 +71,18 @@ class HomeScreen extends StatelessWidget {
                             houseName: 'Ravenclaw',
                             onPressed: (house) {
                               context.read<HomeBloc>().onHousePressed(
-                                house,
-                                snapshot.data!.house,
-                              );
+                                    house,
+                                    snapshot.data!.house,
+                                  );
                             },
                           ),
                           HouseWidget(
                             houseName: 'Hufflepuff',
                             onPressed: (house) {
                               context.read<HomeBloc>().onHousePressed(
-                                house,
-                                snapshot.data!.house,
-                              );
+                                    house,
+                                    snapshot.data!.house,
+                                  );
                             },
                           ),
                         ],
@@ -105,9 +92,9 @@ class HomeScreen extends StatelessWidget {
                         isNotInHouse: true,
                         onPressed: (house) {
                           context.read<HomeBloc>().onHousePressed(
-                            '',
-                            snapshot.data!.house,
-                          );
+                                '',
+                                snapshot.data!.house,
+                              );
                         },
                       ),
                     ],

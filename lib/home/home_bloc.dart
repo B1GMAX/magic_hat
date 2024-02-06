@@ -1,14 +1,17 @@
 import 'dart:math';
-
-import 'package:magic_hat/api_service/api_service.dart';
 import 'package:magic_hat/model/character_model.dart';
+import 'package:magic_hat/model/score_model.dart';
 import 'package:rxdart/rxdart.dart';
 
 class HomeBloc {
-  final ApiService _apiService = ApiService();
+  final List<CharacterModel> _allCharacters = [];
 
-  HomeBloc() {
-    _getRandoCharacter();
+  HomeBloc({
+    required ScoreModel? scoreModel,
+    required List<CharacterModel> characters,
+  }) {
+    _allCharacters.addAll(characters);
+    _getRandomCharacter();
   }
 
   final _characterController = BehaviorSubject<CharacterModel>();
@@ -24,11 +27,11 @@ class HomeBloc {
 
   Stream<int> get failedStream => _failedController.stream;
 
-  Future<void> _getRandoCharacter() async {
-    final characters = await _apiService.getAllCharacters();
-    int randomIndex = Random().nextInt(characters.length);
+  Future<void> _getRandomCharacter() async {
+    print('_allCharacters - ${_allCharacters}');
+    int randomIndex = Random().nextInt(_allCharacters.length);
 
-    final randomCharacter = characters[randomIndex];
+    final randomCharacter = _allCharacters[randomIndex];
     _characterController.add(randomCharacter);
   }
 
@@ -44,6 +47,6 @@ class HomeBloc {
           _failedController.hasValue ? _failedController.value : 0;
       _failedController.add(failedValue = failedValue + 1);
     }
-    await _getRandoCharacter();
+    await _getRandomCharacter();
   }
 }
