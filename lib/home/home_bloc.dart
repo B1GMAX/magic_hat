@@ -1,52 +1,80 @@
+import 'dart:convert';
 import 'dart:math';
 import 'package:magic_hat/model/character_model.dart';
 import 'package:magic_hat/model/score_model.dart';
+import 'package:magic_hat/utils/shared_preferences/shared_preferences.dart';
 import 'package:rxdart/rxdart.dart';
 
 class HomeBloc {
   final List<CharacterModel> _allCharacters = [];
 
   HomeBloc({
-    required ScoreModel? scoreModel,
+    required ScoreModel scoreModel,
     required List<CharacterModel> characters,
   }) {
     _allCharacters.addAll(characters);
+    print('scoreModel - $scoreModel');
+
+    _scoreModelController.add(scoreModel);
+
     _getRandomCharacter();
   }
 
   final _characterController = BehaviorSubject<CharacterModel>();
-  final _totalController = BehaviorSubject<int>();
-  final _successController = BehaviorSubject<int>();
-  final _failedController = BehaviorSubject<int>();
+  final _scoreModelController = BehaviorSubject<ScoreModel>();
 
   Stream<CharacterModel> get characterStream => _characterController.stream;
 
-  Stream<int> get totalStream => _totalController.stream;
-
-  Stream<int> get successStream => _successController.stream;
-
-  Stream<int> get failedStream => _failedController.stream;
+  Stream<ScoreModel> get scoreModelStream => _scoreModelController.stream;
 
   Future<void> _getRandomCharacter() async {
-    print('_allCharacters - ${_allCharacters}');
     int randomIndex = Random().nextInt(_allCharacters.length);
 
     final randomCharacter = _allCharacters[randomIndex];
     _characterController.add(randomCharacter);
   }
 
-  void onHousePressed(String house, String characterHouse) async {
-    int totalValue = _totalController.hasValue ? _totalController.value : 0;
-    _totalController.add(totalValue = totalValue + 1);
-    if (house == characterHouse) {
-      int successValue =
-          _successController.hasValue ? _successController.value : 0;
-      _successController.add(successValue = successValue + 1);
+  void onHousePressed({
+    required String house,
+    required CharacterModel character,
+  }) async {
+    int totalValue = _scoreModelController.hasValue
+        ? _scoreModelController.value.totalValue
+        : 0;
+    int successValue = _scoreModelController.hasValue
+        ? _scoreModelController.value.successValue
+        : 0;
+    int failedValue = _scoreModelController.hasValue
+        ? _scoreModelController.value.failedValue
+        : 0;
+    totalValue = totalValue + 1;
+    if (house == character.house) {
+      successValue = successValue + 1;
+      character = character.copyWith(isGuessed: true);
     } else {
-      int failedValue =
-          _failedController.hasValue ? _failedController.value : 0;
-      _failedController.add(failedValue = failedValue + 1);
+      failedValue = failedValue + 1;
+      character = character.copyWith(attempts: character.attempts + 1);
     }
+    _scoreModelController.add(
+      ScoreModel(
+        failedValue: failedValue,
+        successValue: successValue,
+        totalValue: totalValue,
+      ),
+    );
+
+    await MagicSharedPreferences.instance.saveTotalValue(totalValue);
+    await MagicSharedPreferences.instance.saveSuccessValue(successValue);
+    await MagicSharedPreferences.instance.saveFailedValue(failedValue);
+
+    final List<String> passedCharacters =
+        await MagicSharedPreferences.instance.getPassedCharacters();
+
+    passedCharacters.add(jsonEncode(character.toJson()));
+
+    await MagicSharedPreferences.instance
+        .savePassedCharacters(passedCharacters);
+
     await _getRandomCharacter();
   }
 }

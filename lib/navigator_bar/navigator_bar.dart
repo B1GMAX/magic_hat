@@ -20,6 +20,7 @@ class _NavigatorBarState extends State<NavigatorBar> {
   Widget build(BuildContext context) {
     return Provider<NavigatorBarBloc>(
       create: (context) => NavigatorBarBloc(),
+      lazy: false,
       builder: (context, _) {
         return StreamBuilder<int>(
           initialData: 0,
@@ -62,38 +63,45 @@ class _NavigatorBarState extends State<NavigatorBar> {
                 homeColor: snapshot.data! == 0 ? Colors.black : Colors.grey,
                 listColor: snapshot.data! == 1 ? Colors.black : Colors.grey,
               ),
-              body: Padding(
-                padding: const EdgeInsets.only(top: 15),
-                child: PageView(
-                  controller:
-                      context.read<NavigatorBarBloc>().pagViewController,
-                  onPageChanged: (index) {
-                    context.read<NavigatorBarBloc>().changeIndexPage(index);
-                  },
-                  children: [
-                    StreamBuilder<List<CharacterModel>>(
-                      stream:
-                          context.read<NavigatorBarBloc>().allCharactersStream,
-                      builder: (context, allCharactersSnapshot) {
-                        return StreamBuilder<ScoreModel>(
-                          stream:
-                              context.read<NavigatorBarBloc>().scoreModelStream,
-                          builder: (context, scoreSnapshot) {
-                            return allCharactersSnapshot.hasData
-                                ? HomeScreen(
-                                    scoreModel: scoreSnapshot.data,
-                                    characters: allCharactersSnapshot.data!,
-                                  )
-                                : const Center(
-                                    child: CircularProgressIndicator(),
-                                  );
-                          },
-                        );
-                      },
-                    ),
-                    ListScreen(),
-                  ],
-                ),
+              body: StreamBuilder<List<CharacterModel>>(
+                stream: context.read<NavigatorBarBloc>().allCharactersStream,
+                builder: (context, allCharactersSnapshot) {
+                  return allCharactersSnapshot.hasData
+                      ? Padding(
+                          padding: const EdgeInsets.only(top: 15),
+                          child: PageView(
+                            controller: context
+                                .read<NavigatorBarBloc>()
+                                .pagViewController,
+                            onPageChanged: (index) {
+                              context
+                                  .read<NavigatorBarBloc>()
+                                  .changeIndexPage(index);
+                            },
+                            children: [
+                              StreamBuilder<ScoreModel>(
+                                stream: context
+                                    .read<NavigatorBarBloc>()
+                                    .scoreModelStream,
+                                builder: (context, scoreSnapshot) {
+                                  return scoreSnapshot.hasData
+                                      ? HomeScreen(
+                                          scoreModel: scoreSnapshot.data!,
+                                          characters:
+                                              allCharactersSnapshot.data!,
+                                        )
+                                      : const Center(
+                                          child: CircularProgressIndicator());
+                                },
+                              ),
+                              ListScreen(
+                                allCharacters: allCharactersSnapshot.data!,
+                              ),
+                            ],
+                          ),
+                        )
+                      : const Center(child: CircularProgressIndicator());
+                },
               ),
             );
           },

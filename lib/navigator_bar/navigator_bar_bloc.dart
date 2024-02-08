@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:magic_hat/api_service/api_service.dart';
 import 'package:magic_hat/model/character_model.dart';
@@ -11,15 +13,11 @@ class NavigatorBarBloc {
 
   final _indexPageController = BehaviorSubject<int>();
   final _scoreModelController = BehaviorSubject<ScoreModel>();
-  final _passedCharactersIdsController = BehaviorSubject<List<String>>();
   final _allCharactersSController = BehaviorSubject<List<CharacterModel>>();
 
   Stream<int> get indexPageStream => _indexPageController.stream;
 
   Stream<ScoreModel> get scoreModelStream => _scoreModelController.stream;
-
-  Stream<List<String>> get passedCharactersIdsStream =>
-      _passedCharactersIdsController.stream;
 
   Stream<List<CharacterModel>> get allCharactersStream =>
       _allCharactersSController.stream;
@@ -37,7 +35,18 @@ class NavigatorBarBloc {
   }
 
   Future<void> _getAllCharacters() async {
-    _allCharactersSController.add(await _apiService.getAllCharacters());
+    final List<String> passedCharacters =
+        await MagicSharedPreferences.instance.getPassedCharacters();
+
+    final allCharacters = await _apiService.getAllCharacters();
+
+    for (final passedCharacter in passedCharacters) {
+      allCharacters.removeWhere((element) =>
+          element.id ==
+          CharacterModel.fromJson(jsonDecode(passedCharacter)).id);
+    }
+
+    _allCharactersSController.add(allCharacters);
   }
 
   Future<void> _getSavedData() async {
@@ -50,7 +59,5 @@ class NavigatorBarBloc {
       successValue: successValue,
       totalValue: totalValue,
     ));
-    _passedCharactersIdsController
-        .add(await MagicSharedPreferences.instance.getPassedCharacters());
   }
 }

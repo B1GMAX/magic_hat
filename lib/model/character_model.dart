@@ -11,6 +11,8 @@ class CharacterModel {
   final String? dateOfBirth;
   final String actor;
   final String image;
+  final bool? isGuessed;
+  final int attempts;
 
   CharacterModel({
     required this.id,
@@ -20,10 +22,36 @@ class CharacterModel {
     required this.dateOfBirth,
     required this.actor,
     required this.image,
+    this.attempts = 0,
+    this.isGuessed,
   });
 
   factory CharacterModel.fromJson(Map<String, dynamic> json) =>
       _$CharacterModelFromJson(json);
 
   Map<String, dynamic> toJson() => _$CharacterModelToJson(this);
+
+  CharacterModel copyWith({
+    String? id,
+    String? name,
+    String? species,
+    String? house,
+    String? dateOfBirth,
+    String? actor,
+    String? image,
+    bool? isGuessed,
+    int? attempts,
+  }) {
+    return CharacterModel(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      species: species ?? this.species,
+      house: house ?? this.house,
+      dateOfBirth: dateOfBirth ?? this.dateOfBirth,
+      image: image ?? this.image,
+      isGuessed: isGuessed ?? this.isGuessed,
+      attempts: attempts ?? this.attempts,
+      actor: actor ?? this.actor,
+    );
+  }
 }

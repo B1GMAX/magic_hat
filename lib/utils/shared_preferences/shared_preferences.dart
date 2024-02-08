@@ -28,8 +28,8 @@ class MagicSharedPreferences {
 
   Future<int> getFailedValue() async => (await pref).getInt('failedValue') ?? 0;
 
-  Future<void> savePassedCharactersId(List<String> passedCharactersIds) async =>
-      (await pref).setStringList('passedCharacters', passedCharactersIds);
+  Future<void> savePassedCharacters(List<String> passedCharacters) async =>
+      (await pref).setStringList('passedCharacters', passedCharacters);
 
   Future<List<String>> getPassedCharacters() async =>
       (await pref).getStringList('passedCharacters') ?? [];
