@@ -12,7 +12,7 @@ class CharacterModel {
   final String actor;
   final String image;
   final bool? isGuessed;
-  final int attempts;
+  final int? attempts;
 
   CharacterModel({
     required this.id,
@@ -22,8 +22,8 @@ class CharacterModel {
     required this.dateOfBirth,
     required this.actor,
     required this.image,
-    this.attempts = 0,
-    this.isGuessed,
+    required this.attempts,
+    required this.isGuessed,
   });
 
   factory CharacterModel.fromJson(Map<String, dynamic> json) =>

@@ -4,6 +4,7 @@ import 'package:magic_hat/list_screen/list_screen.dart';
 import 'package:magic_hat/model/character_model.dart';
 import 'package:magic_hat/model/score_model.dart';
 import 'package:magic_hat/navigator_bar/navigator_bar_bloc.dart';
+import 'package:magic_hat/utils/scores.dart';
 import 'package:provider/provider.dart';
 
 import 'navigator_bar_widget.dart';
@@ -46,7 +47,9 @@ class _NavigatorBarState extends State<NavigatorBar> {
                     ),
                     actions: [
                       GestureDetector(
-                        onTap: () {},
+                        onTap: () {
+                          context.read<NavigatorBarBloc>().reset();
+                        },
                         child: const Text(
                           'Reset',
                           style: TextStyle(fontSize: 17),
@@ -66,41 +69,62 @@ class _NavigatorBarState extends State<NavigatorBar> {
               body: StreamBuilder<List<CharacterModel>>(
                 stream: context.read<NavigatorBarBloc>().allCharactersStream,
                 builder: (context, allCharactersSnapshot) {
-                  return allCharactersSnapshot.hasData
-                      ? Padding(
-                          padding: const EdgeInsets.only(top: 15),
-                          child: PageView(
-                            controller: context
-                                .read<NavigatorBarBloc>()
-                                .pagViewController,
-                            onPageChanged: (index) {
-                              context
-                                  .read<NavigatorBarBloc>()
-                                  .changeIndexPage(index);
-                            },
-                            children: [
-                              StreamBuilder<ScoreModel>(
-                                stream: context
-                                    .read<NavigatorBarBloc>()
-                                    .scoreModelStream,
-                                builder: (context, scoreSnapshot) {
-                                  return scoreSnapshot.hasData
-                                      ? HomeScreen(
+                  return StreamBuilder<ScoreModel>(
+                    stream: context.read<NavigatorBarBloc>().scoreModelStream,
+                    builder: (context, scoreSnapshot) {
+                      return scoreSnapshot.hasData &&
+                              allCharactersSnapshot.hasData
+                          ? Padding(
+                              padding: const EdgeInsets.only(top: 15),
+                              child: Column(
+                                children: [
+                                  Scores(
+                                    totalText: 'Total',
+                                    totalValue: scoreSnapshot.data!.totalValue
+                                        .toString(),
+                                    successText: 'Success',
+                                    successValue: scoreSnapshot
+                                        .data!.successValue
+                                        .toString(),
+                                    failedText: 'Failed',
+                                    failedValue: scoreSnapshot.data!.failedValue
+                                        .toString(),
+                                  ),
+                                  Expanded(
+                                    child: PageView(
+                                      controller: context
+                                          .read<NavigatorBarBloc>()
+                                          .pagViewController,
+                                      onPageChanged: (index) {
+                                        context
+                                            .read<NavigatorBarBloc>()
+                                            .changeIndexPage(index);
+                                      },
+                                      children: [
+                                        HomeScreen(
                                           scoreModel: scoreSnapshot.data!,
                                           characters:
                                               allCharactersSnapshot.data!,
-                                        )
-                                      : const Center(
-                                          child: CircularProgressIndicator());
-                                },
+                                          scoreModelSink: context
+                                              .read<NavigatorBarBloc>()
+                                              .scoreModelSink,
+                                        ),
+                                        ListScreen(
+                                          allCharacters:
+                                              allCharactersSnapshot.data!,
+                                          scoreModel: scoreSnapshot.data!,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
                               ),
-                              ListScreen(
-                                allCharacters: allCharactersSnapshot.data!,
-                              ),
-                            ],
-                          ),
-                        )
-                      : const Center(child: CircularProgressIndicator());
+                            )
+                          : const Center(
+                              child: CircularProgressIndicator(),
+                            );
+                    },
+                  );
                 },
               ),
             );

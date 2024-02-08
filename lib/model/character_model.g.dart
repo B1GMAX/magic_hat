@@ -15,6 +15,8 @@ CharacterModel _$CharacterModelFromJson(Map<String, dynamic> json) =>
       dateOfBirth: json['dateOfBirth'] as String?,
       actor: json['actor'] as String,
       image: json['image'] as String,
+      attempts: json['attempts'] as int?,
+      isGuessed: json['isGuessed'] as bool?,
     );
 
 Map<String, dynamic> _$CharacterModelToJson(CharacterModel instance) =>
@@ -26,4 +28,6 @@ Map<String, dynamic> _$CharacterModelToJson(CharacterModel instance) =>
       'dateOfBirth': instance.dateOfBirth,
       'actor': instance.actor,
       'image': instance.image,
+      'isGuessed': instance.isGuessed,
+      'attempts': instance.attempts,
     };

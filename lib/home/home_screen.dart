@@ -4,16 +4,17 @@ import 'package:magic_hat/home/home_bloc.dart';
 import 'package:magic_hat/home/house_widget.dart';
 import 'package:magic_hat/model/character_model.dart';
 import 'package:magic_hat/model/score_model.dart';
-import 'package:magic_hat/utils/scores.dart';
 import 'package:provider/provider.dart';
 
 class HomeScreen extends StatelessWidget {
   final ScoreModel scoreModel;
   final List<CharacterModel> characters;
+  final Sink<ScoreModel> scoreModelSink;
 
   const HomeScreen({
     required this.scoreModel,
     required this.characters,
+    required this.scoreModelSink,
     super.key,
   });
 
@@ -23,6 +24,7 @@ class HomeScreen extends StatelessWidget {
       create: (context) => HomeBloc(
         scoreModel: scoreModel,
         characters: characters,
+        scoreModelSink: scoreModelSink,
       ),
       lazy: false,
       builder: (context, _) {
@@ -32,28 +34,6 @@ class HomeScreen extends StatelessWidget {
             return characterModelSnapshot.hasData
                 ? Column(
                     children: [
-                      StreamBuilder<ScoreModel>(
-                        stream: context.read<HomeBloc>().scoreModelStream,
-                        builder: (context, scoreModelSnapshot) {
-                          return scoreModelSnapshot.hasData
-                              ? Scores(
-                                  totalText: 'Total',
-                                  totalValue: scoreModelSnapshot
-                                      .data!.totalValue
-                                      .toString(),
-                                  successText: 'Success',
-                                  successValue: scoreModelSnapshot
-                                      .data!.successValue
-                                      .toString(),
-                                  failedText: 'Failed',
-                                  failedValue: scoreModelSnapshot
-                                      .data!.failedValue
-                                      .toString(),
-                                )
-                              : const SizedBox.shrink();
-                        },
-                      ),
-                      const SizedBox(height: 15),
                       CharacterWidget(character: characterModelSnapshot.data!),
                       const SizedBox(height: 15),
                       Row(

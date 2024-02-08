@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:magic_hat/details/details_screen.dart';
 import 'package:magic_hat/list_screen/list_bloc.dart';
 import 'package:magic_hat/model/character_model.dart';
+import 'package:magic_hat/model/score_model.dart';
 import 'package:magic_hat/utils/character_widget.dart';
-import 'package:magic_hat/utils/scores.dart';
 import 'package:provider/provider.dart';
 
 class ListScreen extends StatelessWidget {
   final List<CharacterModel> allCharacters;
+  final ScoreModel scoreModel;
 
   const ListScreen({
     required this.allCharacters,
+    required this.scoreModel,
     super.key,
   });
 
@@ -22,19 +25,10 @@ class ListScreen extends StatelessWidget {
         return Column(
           mainAxisSize: MainAxisSize.max,
           children: [
-            Scores(
-              totalText: 'Total',
-              totalValue: 6.toString(),
-              successText: 'Success',
-              successValue: 6.toString(),
-              failedText: 'Failed',
-              failedValue: 6.toString(),
-            ),
             TextField(),
             StreamBuilder<List<CharacterModel>>(
               stream: context.read<ListBloc>().charactersStream,
               builder: (context, snapshot) {
-                print('snapshot.data - ${snapshot.data}');
                 return snapshot.hasData
                     ? Expanded(
                         child: CustomScrollView(
@@ -42,11 +36,18 @@ class ListScreen extends StatelessWidget {
                             SliverList(
                               delegate: SliverChildBuilderDelegate(
                                 (context, index) {
-                                  print(
-                                      'snapshot.data![index - ${snapshot.data![index]}');
                                   return CharacterWidget(
                                     character: snapshot.data![index],
                                     isListScreen: true,
+                                    onCharacterTap: (character) {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => DetailsScreen(
+                                              character: character),
+                                        ),
+                                      );
+                                    },
                                   );
                                 },
                                 childCount: snapshot.data!.length,
@@ -58,6 +59,7 @@ class ListScreen extends StatelessWidget {
                     : const Center(child: CircularProgressIndicator());
               },
             ),
+            const SizedBox(height: 15),
           ],
         );
       },

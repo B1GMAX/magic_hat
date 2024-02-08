@@ -8,14 +8,17 @@ import 'package:rxdart/rxdart.dart';
 class HomeBloc {
   final List<CharacterModel> _allCharacters = [];
 
+  final ScoreModel? scoreModel;
+  final Sink<ScoreModel> scoreModelSink;
+
   HomeBloc({
-    required ScoreModel scoreModel,
+    this.scoreModel,
     required List<CharacterModel> characters,
+    required this.scoreModelSink,
   }) {
     _allCharacters.addAll(characters);
-    print('scoreModel - $scoreModel');
 
-    _scoreModelController.add(scoreModel);
+    // _scoreModelController.add(scoreModel);
 
     _getRandomCharacter();
   }
@@ -38,24 +41,29 @@ class HomeBloc {
     required String house,
     required CharacterModel character,
   }) async {
-    int totalValue = _scoreModelController.hasValue
-        ? _scoreModelController.value.totalValue
-        : 0;
-    int successValue = _scoreModelController.hasValue
-        ? _scoreModelController.value.successValue
-        : 0;
-    int failedValue = _scoreModelController.hasValue
-        ? _scoreModelController.value.failedValue
-        : 0;
+    int totalValue = scoreModel != null ? scoreModel!.totalValue : 0;
+    int successValue = scoreModel != null ? scoreModel!.successValue : 0;
+    int failedValue = scoreModel != null ? scoreModel!.failedValue : 0;
     totalValue = totalValue + 1;
     if (house == character.house) {
       successValue = successValue + 1;
       character = character.copyWith(isGuessed: true);
     } else {
       failedValue = failedValue + 1;
-      character = character.copyWith(attempts: character.attempts + 1);
+      character = character.copyWith(isGuessed: false);
     }
-    _scoreModelController.add(
+    int attempts = character.attempts ?? 0;
+
+    attempts = attempts + 1;
+
+    if (character.isGuessed != true) {
+      character = character.copyWith(attempts: attempts);
+    } else {
+      character = character.copyWith(
+          attempts: character.attempts != null ? attempts : 1);
+    }
+
+    scoreModelSink.add(
       ScoreModel(
         failedValue: failedValue,
         successValue: successValue,
@@ -73,7 +81,7 @@ class HomeBloc {
     passedCharacters.add(jsonEncode(character.toJson()));
 
     await MagicSharedPreferences.instance
-        .savePassedCharacters(passedCharacters);
+        .savePassedCharacters(passedCharacters.toSet().toList());
 
     await _getRandomCharacter();
   }

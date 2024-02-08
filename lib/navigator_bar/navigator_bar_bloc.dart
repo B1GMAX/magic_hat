@@ -22,6 +22,8 @@ class NavigatorBarBloc {
   Stream<List<CharacterModel>> get allCharactersStream =>
       _allCharactersSController.stream;
 
+  Sink<ScoreModel> get scoreModelSink => _scoreModelController.sink;
+
   NavigatorBarBloc() {
     _getSavedData();
     _getAllCharacters();
@@ -41,9 +43,9 @@ class NavigatorBarBloc {
     final allCharacters = await _apiService.getAllCharacters();
 
     for (final passedCharacter in passedCharacters) {
-      allCharacters.removeWhere((element) =>
-          element.id ==
-          CharacterModel.fromJson(jsonDecode(passedCharacter)).id);
+      final ch = CharacterModel.fromJson(jsonDecode(passedCharacter));
+      allCharacters.removeWhere(
+          (element) => element.id == ch.id && ch.isGuessed == true);
     }
 
     _allCharactersSController.add(allCharacters);
@@ -59,5 +61,12 @@ class NavigatorBarBloc {
       successValue: successValue,
       totalValue: totalValue,
     ));
+  }
+
+  void reset() async {
+    await MagicSharedPreferences.instance.saveTotalValue(0);
+    await MagicSharedPreferences.instance.saveSuccessValue(0);
+    await MagicSharedPreferences.instance.saveFailedValue(0);
+    await MagicSharedPreferences.instance.savePassedCharacters([]);
   }
 }
