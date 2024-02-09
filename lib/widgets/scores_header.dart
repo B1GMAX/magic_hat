@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
-import 'package:magic_hat/utils/score_widget.dart';
+import 'package:magic_hat/widgets/score_widget.dart';
 
-class Scores extends StatelessWidget {
+class ScoresHeader extends StatelessWidget {
   final String totalText;
   final String totalValue;
   final String successText;
@@ -9,7 +9,7 @@ class Scores extends StatelessWidget {
   final String failedText;
   final String failedValue;
 
-  const Scores({
+  const ScoresHeader({
     required this.totalText,
     required this.totalValue,
     required this.successText,

@@ -1,27 +1,13 @@
-import 'dart:convert';
-import 'dart:math';
+import 'dart:ui';
 import 'package:magic_hat/model/character_model.dart';
 import 'package:magic_hat/model/score_model.dart';
-import 'package:magic_hat/utils/shared_preferences/shared_preferences.dart';
+import 'package:magic_hat/repository/repository.dart';
 import 'package:rxdart/rxdart.dart';
 
 class HomeBloc {
-  final List<CharacterModel> _allCharacters = [];
+  VoidCallback onHouseTap;
 
-  final ScoreModel? scoreModel;
-  final Sink<ScoreModel> scoreModelSink;
-
-  HomeBloc({
-    this.scoreModel,
-    required List<CharacterModel> characters,
-    required this.scoreModelSink,
-  }) {
-    _allCharacters.addAll(characters);
-
-    // _scoreModelController.add(scoreModel);
-
-    _getRandomCharacter();
-  }
+  HomeBloc({required this.onHouseTap});
 
   final _characterController = BehaviorSubject<CharacterModel>();
   final _scoreModelController = BehaviorSubject<ScoreModel>();
@@ -30,40 +16,25 @@ class HomeBloc {
 
   Stream<ScoreModel> get scoreModelStream => _scoreModelController.stream;
 
-  Future<void> _getRandomCharacter() async {
-    int randomIndex = Random().nextInt(_allCharacters.length);
-
-    final randomCharacter = _allCharacters[randomIndex];
-    _characterController.add(randomCharacter);
-  }
-
   void onHousePressed({
     required String house,
     required CharacterModel character,
+    required Sink<ScoreModel> scoreModelController,
+    required ScoreModel scoreModel,
   }) async {
-    int totalValue = scoreModel != null ? scoreModel!.totalValue : 0;
-    int successValue = scoreModel != null ? scoreModel!.successValue : 0;
-    int failedValue = scoreModel != null ? scoreModel!.failedValue : 0;
-    totalValue = totalValue + 1;
+    int totalValue = scoreModel.totalValue;
+    int successValue = scoreModel.successValue;
+    int failedValue = scoreModel.failedValue;
+    totalValue += 1;
     if (house == character.house) {
-      successValue = successValue + 1;
+      successValue += 1;
       character = character.copyWith(isGuessed: true);
     } else {
-      failedValue = failedValue + 1;
+      failedValue += 1;
       character = character.copyWith(isGuessed: false);
     }
-    int attempts = character.attempts ?? 0;
 
-    attempts = attempts + 1;
-
-    if (character.isGuessed != true) {
-      character = character.copyWith(attempts: attempts);
-    } else {
-      character = character.copyWith(
-          attempts: character.attempts != null ? attempts : 1);
-    }
-
-    scoreModelSink.add(
+    scoreModelController.add(
       ScoreModel(
         failedValue: failedValue,
         successValue: successValue,
@@ -71,18 +42,39 @@ class HomeBloc {
       ),
     );
 
-    await MagicSharedPreferences.instance.saveTotalValue(totalValue);
-    await MagicSharedPreferences.instance.saveSuccessValue(successValue);
-    await MagicSharedPreferences.instance.saveFailedValue(failedValue);
+    await Repository.instance.saveTotalValue(totalValue);
+    await Repository.instance.saveSuccessValue(successValue);
+    await Repository.instance.saveFailedValue(failedValue);
 
-    final List<String> passedCharacters =
-        await MagicSharedPreferences.instance.getPassedCharacters();
+    await saveCharacterToDb(character);
 
-    passedCharacters.add(jsonEncode(character.toJson()));
+    onHouseTap();
+  }
 
-    await MagicSharedPreferences.instance
-        .savePassedCharacters(passedCharacters.toSet().toList());
+  Future<void> saveCharacterToDb(CharacterModel character) async {
+    List<CharacterModel> passedCharacters =
+        await Repository.instance.getPassedCharacters();
 
-    await _getRandomCharacter();
+    bool found = false;
+
+    for (int i = 0; i < passedCharacters.length; i++) {
+      final ch = passedCharacters[i];
+      if (ch.id == character.id) {
+        passedCharacters[i] = ch.copyWith(
+            attempts: ch.attempts! + 1, isGuessed: character.isGuessed);
+        found = true;
+      }
+    }
+
+    if (!found) {
+      passedCharacters.add(character.copyWith(attempts: 1));
+    }
+
+    await Repository.instance.savePassedCharacters(passedCharacters);
+  }
+
+  void dispose() {
+    _characterController.close();
+    _scoreModelController.close();
   }
 }

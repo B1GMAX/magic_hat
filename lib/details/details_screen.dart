@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:magic_hat/model/character_model.dart';
 
+import 'character_description.dart';
+
 class DetailsScreen extends StatelessWidget {
   final CharacterModel character;
 
@@ -30,9 +32,9 @@ class DetailsScreen extends StatelessWidget {
                   onPressed: () {
                     Navigator.pop(context);
                   },
-                  icon: Icon(Icons.arrow_back),
+                  icon: const Icon(Icons.arrow_back),
                 ),
-                Text('Back'),
+                const Text('Back'),
               ],
             ),
             title: Text(
@@ -44,89 +46,60 @@ class DetailsScreen extends StatelessWidget {
           ),
         ),
       ),
-      body: Row(
-        children: [
-          character.image.isNotEmpty
-              ? Image.network(
-                  character.image,
-                  height: 200,
-                )
-              : Image.asset(
-                  'assets/images/anonym.jpg',
-                  height: 200,
-                ),
-          const SizedBox(width: 10),
-          character.isGuessed!
-              ? Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Row(
+      body: Padding(
+        padding: const EdgeInsets.all(10),
+        child: Row(
+          children: [
+            character.image.isNotEmpty
+                ? Image.network(
+                    character.image,
+                    height: 200,
+                  )
+                : Image.asset(
+                    'assets/images/anonym.jpg',
+                    height: 170,
+                  ),
+            const SizedBox(width: 10),
+            character.isGuessed!
+                ? Flexible(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Text(
-                          'House:',
-                          style: TextStyle(fontSize: 18),
+                        CharacterDescription(
+                          description: character.house.isNotEmpty
+                              ? character.house
+                              : 'Not in a House ',
+                          descriptionName: 'House:',
                         ),
-                        const SizedBox(width: 5),
-                        Text(
-                          character.house,
-                          style: const TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.w600),
-                        ),
-                      ],
-                    ),
-                    if (character.dateOfBirth != null)
-                      const SizedBox(height: 10),
-                    if (character.dateOfBirth != null)
-                      Row(
-                        children: [
-                          const Text(
-                            'Date of birth:',
-                            style: TextStyle(fontSize: 18),
+                        if (character.dateOfBirth != null)
+                          const SizedBox(height: 10),
+                        if (character.dateOfBirth != null)
+                          CharacterDescription(
+                            description: character.dateOfBirth!,
+                            descriptionName: 'Date of birth:',
                           ),
-                          const SizedBox(width: 5),
-                          Text(
-                            character.house,
-                            style: const TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.w600),
+                        if (character.actor.isNotEmpty)
+                          const SizedBox(height: 10),
+                        if (character.actor.isNotEmpty)
+                          CharacterDescription(
+                            description: character.actor,
+                            descriptionName: 'Actor:',
                           ),
-                        ],
-                      ),
-                    const SizedBox(height: 10),
-                    Row(
-                      children: [
-                        const Text(
-                          'Actor:',
-                          style: TextStyle(fontSize: 18),
+                        const SizedBox(height: 10),
+                        CharacterDescription(
+                          description: character.species,
+                          descriptionName: 'Species:',
                         ),
-                        const SizedBox(width: 5),
-                        Text(
-                          character.actor,
-                          style: const TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.w600),
-                        ),
+                        const SizedBox(height: 10),
                       ],
                     ),
-                    const SizedBox(height: 10),
-                    Row(
-                      children: [
-                        const Text(
-                          'Species:',
-                          style: TextStyle(fontSize: 18),
-                        ),
-                        const SizedBox(width: 5),
-                        Text(
-                          character.species,
-                          style: const TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.w600),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-                  ],
-                )
-              : Image.asset('assets/images/access_denied.png'),
-        ],
+                  )
+                : Flexible(
+                    child: Image.asset('assets/images/access_denied.png'),
+                  ),
+          ],
+        ),
       ),
     );
   }

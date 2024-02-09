@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'navigator_bar/navigator_bar.dart';
+import 'main/main_screen.dart';
 
 void main() async {
   runApp(const MyApp());
@@ -14,7 +14,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         scaffoldBackgroundColor: Colors.white,
       ),
-      home: const NavigatorBar(),
+      home: const MainScreen(),
     );
   }
 }
