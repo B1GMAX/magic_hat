@@ -11,16 +11,17 @@ class CharacterWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final height = MediaQuery.of(context).size.height;
     return Column(
       children: [
         character.image.isNotEmpty
             ? Image.network(
                 character.image,
-                height: 200,
+                height: height * 0.283,
               )
             : Image.asset(
                 'assets/images/anonym.jpg',
-                height: 200,
+                height: height * 0.283,
               ),
         Text(
           character.name,

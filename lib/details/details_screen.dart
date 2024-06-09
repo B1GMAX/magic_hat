@@ -13,6 +13,7 @@ class DetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final height = MediaQuery.of(context).size.height;
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: const Size(double.infinity, 50),
@@ -25,7 +26,7 @@ class DetailsScreen extends StatelessWidget {
           ),
           child: AppBar(
             centerTitle: true,
-            leadingWidth: 100,
+            leadingWidth: height * 0.142,
             leading: Row(
               children: [
                 IconButton(
@@ -53,11 +54,11 @@ class DetailsScreen extends StatelessWidget {
             character.image.isNotEmpty
                 ? Image.network(
                     character.image,
-                    height: 200,
+                    height: height * 0.283,
                   )
                 : Image.asset(
                     'assets/images/anonym.jpg',
-                    height: 170,
+                    height: height * 0.241,
                   ),
             const SizedBox(width: 10),
             character.isGuessed!

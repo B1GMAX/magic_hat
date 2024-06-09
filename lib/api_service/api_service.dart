@@ -5,11 +5,11 @@ import 'package:http/http.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 class ApiService {
-  final String api = 'https://hp-api.onrender.com/api';
+  final String _api = 'https://hp-api.onrender.com/api';
 
   Future<List<CharacterModel>> getAllCharacters() async {
     final List<CharacterModel> characters = [];
-    final response = await get(Uri.parse('$api/characters'));
+    final response = await get(Uri.parse('$_api/characters'));
     if (response.statusCode == 200) {
       try {
         final List responseCharacters = jsonDecode(response.body);

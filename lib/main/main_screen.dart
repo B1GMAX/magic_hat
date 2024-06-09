@@ -3,6 +3,7 @@ import 'package:magic_hat/home/home_screen.dart';
 import 'package:magic_hat/list_screen/list_screen.dart';
 import 'package:magic_hat/model/character_model.dart';
 import 'package:magic_hat/model/score_model.dart';
+import 'package:magic_hat/widgets/main_screen_appbar.dart';
 import 'package:magic_hat/widgets/scores_header.dart';
 import 'package:provider/provider.dart';
 
@@ -31,9 +32,7 @@ class _MainScreenState extends State<MainScreen> {
             return SafeArea(
               child: Scaffold(
                 bottomNavigationBar: NavigatorBarWidget(
-                  onPageChange: (index) {
-                    context.read<MainBloc>().changeIndexPage(index);
-                  },
+                  onPageChange: context.read<MainBloc>().changeIndexPage,
                   homeColor: snapshot.data! == 0 ? Colors.black : Colors.grey,
                   listColor: snapshot.data! == 1 ? Colors.black : Colors.grey,
                 ),
@@ -48,36 +47,11 @@ class _MainScreenState extends State<MainScreen> {
                                 padding: const EdgeInsets.only(top: 15),
                                 child: Column(
                                   children: [
-                                    Container(
-                                      padding: const EdgeInsets.only(
-                                          right: 10, left: 10),
-                                      decoration: const BoxDecoration(
-                                        border: Border(
-                                          bottom:
-                                              BorderSide(color: Colors.black),
-                                        ),
-                                      ),
-                                      child: AppBar(
-                                        centerTitle: true,
-                                        title: Text(
-                                          snapshot.data! == 0
-                                              ? 'Home Screen'
-                                              : 'List Screen',
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                        actions: [
-                                          GestureDetector(
-                                            onTap:
-                                                context.read<MainBloc>().reset,
-                                            child: const Text(
-                                              'Reset',
-                                              style: TextStyle(fontSize: 17),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
+                                    MainScreenAppBar(
+                                      text: snapshot.data! == 0
+                                          ? 'Home Screen'
+                                          : 'List Screen',
+                                      onTap: context.read<MainBloc>().reset,
                                     ),
                                     const SizedBox(height: 10),
                                     ScoresHeader(

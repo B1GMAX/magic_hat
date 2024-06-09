@@ -46,12 +46,12 @@ class HomeBloc {
     await Repository.instance.saveSuccessValue(successValue);
     await Repository.instance.saveFailedValue(failedValue);
 
-    await saveCharacterToDb(character);
+    await _saveCharacterToDb(character);
 
     onHouseTap();
   }
 
-  Future<void> saveCharacterToDb(CharacterModel character) async {
+  Future<void> _saveCharacterToDb(CharacterModel character) async {
     List<CharacterModel> passedCharacters =
         await Repository.instance.getPassedCharacters();
 
